@@ -13,7 +13,7 @@ var walletSchema = new Schema({
         unique: true
     },
     balance:{
-        type: String,
+        type: Number,
     },
     id:{
         type: String,
@@ -30,7 +30,7 @@ var transactionSchema = new Schema({
         type: String
     },
     amount:{
-        type: String,
+        type: Number,
     },
     description:{
         type: String
@@ -45,10 +45,10 @@ var transactionSchema = new Schema({
         type: String
     },
     openingBalance:{
-        type: String
+        type: Number
     },
     closingBalance:{
-        type: String
+        type: Number
     }
 });
 var transactionSchema  = mongoose.model('Transaction', transactionSchema);

@@ -1,8 +1,10 @@
 const { walletSchema }= require('../models/model')
 const { transactionSchema }= require('../models/model')
 const {getTransactionId}= require('../general/general')
-var {csvwriter, createObjectCsvWriter}  = require('csv-writer')
+var { createObjectCsvWriter}  = require('csv-writer')
 const { uploadFileFunction,getPresignedUrl } = require('../config/s3')
+const {convertNumbertoFourPrecision} = require('../transformer/transformer')
+
 
 
 async function makeTransaction(transactObj){
@@ -11,8 +13,8 @@ async function makeTransaction(transactObj){
         if(data){
             transactObj.transactionId = getTransactionId()
             transactObj.date = new Date()
-            transactObj.openingBalance=parseFloat(data.balance).toFixed(4);
-            transactObj.amount = parseFloat(transactObj.amount).toFixed(4)
+            transactObj.openingBalance = data.balance
+            transactObj.amount = transactObj.amount
             if(transactObj.openingBalance < transactObj.amount && transactObj.amount < 0){
                 return { status:"error", message:"insufficient balance" }
             }
@@ -21,9 +23,9 @@ async function makeTransaction(transactObj){
             }
                 if(transactObj.amount < 0) transactObj.type = 'DEBIT'
                 else transactObj.type = 'CREDIT';
-                console.log(transactObj.amount)
-                transactObj.closingBalance = parseFloat(eval(transactObj.openingBalance + '+' + transactObj.amount)).toFixed(4)
-                transactObj.amount = parseFloat(transactObj.type ==="CREDIT" ? transactObj.amount : transactObj.amount*-1).toFixed(4)
+                transactObj.closingBalance = transactObj.openingBalance + transactObj.amount
+                transactObj.amount = transactObj.type ==="CREDIT" ? transactObj.amount : transactObj.amount*-1
+                console.log(transactObj)
                 try{
                     let request = new transactionSchema(transactObj)
                     ok = await request.save()
@@ -34,10 +36,10 @@ async function makeTransaction(transactObj){
                                 id : transactObj.walletId,
                                 transactionId : transactObj.transactionId,
                                 type: transactObj.type,
-                                balance : transactObj.closingBalance,
+                                balance : convertNumbertoFourPrecision(transactObj.closingBalance),
                                 date : transactObj.date,
                                 description : transactObj.description,
-                                amount : transactObj.amount
+                                amount : convertNumbertoFourPrecision(transactObj.amount)
                             }
                             return {status:"ok", message:"transaction successful", data: responseData }
                          }
@@ -71,6 +73,18 @@ async function fetchTransactionsByWalletId(filterObj){
                 skip:filterObj.skip,
                 limit: filterObj.limit,
                 sort: filterObj.sort
+            })
+            data = data.map(val=> {
+                return {
+                    transactionId: val.transactionId,
+                    amount: convertNumbertoFourPrecision(val.amount),
+                    description: val.description,
+                    type: val.type,
+                    date: val.date,
+                    walletId: val.walletId,
+                    openingBalance: convertNumbertoFourPrecision(val.openingBalance),
+                    closingBalance: convertNumbertoFourPrecision(val.closingBalance)
+                }
             })
         if(data.length == 0){
             return {status:"ok", message:"no transactions available", data: data}
@@ -106,32 +120,34 @@ async function getCSV(walletId){
                     ]
                   });
                   let result = []
-                  for(let i =0; i<= data.length -1; i++){
-                        result.push({
-                            transactionId: data[i].transactionId,
-                            amount: data[i].amount,
-                            description: data[i].description,
-                            type : data[i].type,
-                            date : data[i].date,
-                            walletId : data[i].walletId,
-                            openingBalance : data[i].openingBalance,
-                            closingBalance : data[i].closingBalance
-                        })
-                    }
-                    try{
-                        await csvWriter.writeRecords(result)
-                    } catch(e){
-                        return {status:"error", message:"could not convert to csv file"}
-                    }              
-                    console.log('Data uploaded into csv successfully')
-                    ok = await uploadFileFunction(filename, path)
-                    if(ok.status === 'ok'){
-                        presinedUrl = getPresignedUrl(filename)
-                        return { status:"ok", data:presinedUrl }
-                    }
-                    else{
-                        return {status:"error", message:"upload failed"}
-                    }
+                  data = data.map(val=> {
+                    result.push(
+                        {
+                            transactionId: val.transactionId,
+                            amount: convertNumbertoFourPrecision(val.amount),
+                            description: val.description,
+                            type: val.type,
+                            date: val.date,
+                            walletId: val.walletId,
+                            openingBalance: convertNumbertoFourPrecision(val.openingBalance),
+                            closingBalance: convertNumbertoFourPrecision(val.closingBalance)
+                        }
+                    )
+                })
+                try{
+                    await csvWriter.writeRecords(result)
+                } catch(e){
+                    return {status:"error", message:"could not convert to csv file"}
+                }              
+                console.log('Data uploaded into csv successfully')
+                ok = await uploadFileFunction(filename, path)
+                if(ok.status === 'ok'){
+                    presinedUrl = getPresignedUrl(filename)
+                    return { status:"ok", data:presinedUrl }
+                }
+                else{
+                    return {status:"error", message:"upload failed"}
+                }
             } else{
                 return {status:"error", message:"no transactions available"}
             }

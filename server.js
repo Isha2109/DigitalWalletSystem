@@ -19,7 +19,7 @@ app.get('/', function(req, res) {
 
 app.post('/setup', async function(req, res) {
     let setupObj ={
-        balance: req.body.balance,
+        balance: Number(req.body.balance),
         name: req.body.name,
         username: req.body.username,
         id : getWalletId(),
@@ -61,7 +61,7 @@ app.get('/wallet/:id', async function(req, res) {
 app.post('/transact/:walletId', async function(req,res){
     let transactObj ={
         walletId : req.params.walletId,
-        amount: req.body.amount,
+        amount: Number(req.body.amount),
         description: req.body.description
     }
     ok = await makeTransaction(transactObj)

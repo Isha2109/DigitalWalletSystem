@@ -1,5 +1,5 @@
 const { walletSchema }= require('../models/model')
-const { transactionSchema }= require('../models/model')
+const {convertNumbertoFourPrecision} = require('../transformer/transformer')
 
 async function setupWallet(setupObj){
     let request = new walletSchema(setupObj)
@@ -12,13 +12,14 @@ async function setupWallet(setupObj){
                 name: val.name,
                 id: val.id,
                 date: val.date,
-                balance: parseFloat(val.balance).toFixed(4)
+                balance: convertNumbertoFourPrecision(val.balance)
             }
         })
         if(data) return {status:"ok", message: data}
         else return {status:"error", message: "an unknown error occured"}
     }
     catch(ex){
+        console.log(ex)
         return {status:"error", message:"an unknown error occured"}
     }
 }
@@ -31,7 +32,7 @@ async function getWalletById(id){
                 name: val.name,
                 id: val.id,
                 date: val.date,
-                balance: parseFloat(val.balance).toFixed(4)
+                balance: convertNumbertoFourPrecision(val.balance)
             }
         })
         if(data) {return {status:"ok", message: data} }
