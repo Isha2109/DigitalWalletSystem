@@ -5,8 +5,9 @@ const bodyParser = require('body-parser')
 const { createDBConn } = require('./config/db')
 const {setupWallet, getWalletById , getWalletByUsername} = require('./controller/walletController')
 const { getWalletId} =  require('./general/general')
-const { makeTransaction, fetchTransactionsByWalletId} = require('./controller/transactionController')
+const { makeTransaction, fetchTransactionsByWalletId, getCSV} = require('./controller/transactionController')
 require(`dotenv`).config()
+var { Parser } = require('json2csv')
 
 app.use(bodyParser.json({}))
 app.use(cors())
@@ -25,7 +26,6 @@ app.post('/setup', async function(req, res) {
         date : new Date()
     }
     ok = await setupWallet(setupObj)
-    console.log(ok)
     if(ok.message ==="an unknown error occured")
     { 
         res.status(404).send({status:"ok", message:"wallet setup failed"})
@@ -45,7 +45,7 @@ app.get('/walletByUsername/:username', async function(req, res) {
             res.status(404).send({status:"ok", message:"wallet not found"})
         }
     }
-    else res.status(200).send({status:"ok", message:"walletId fetched", data: ok.data})
+    else res.status(200).send({status:"ok", message:"walletId fetched", walletId: ok.data})
 })
 
 app.get('/wallet/:id', async function(req, res) {
@@ -97,7 +97,6 @@ app.get('/transactions', async function(req, res){
     if(req.query.sort) {
         filterObj.sort = req.query.sort === "date" ? { date : req.query.sortType === "asc" ? 0 : -1 } : { amount : req.query.sortType === "asc" ? 0 : -1 }
     }
-    console.log(filterObj)
     ok = await fetchTransactionsByWalletId(filterObj)
 
     if(ok.message==="an unknown error occured"){
@@ -106,11 +105,22 @@ app.get('/transactions', async function(req, res){
     else if(ok.message==="walletId does not exist"){
         res.status(400).send({status:"ok", message:"walletId does not exist"})
     }
-    else res.status(200).send({status:"ok", message: "transaction successful", data: ok.data})
+    else if(ok.message==="no transactions available"){
+        res.status(200).send({status:"ok", message:"no transactions available"})
+    }
+    else res.status(200).send({status:"ok", message: "Transaction Details", data: ok.data})
 })
 
+app.get('/transactions/exportToCSV', async function(req, res){
+    let walletId = req.query.walletId
+    ok = await getCSV(walletId)
+    if(ok.status === "ok"){
+        res.status(200).send(ok)
+    }else{
+        res.status(400).send(ok)
+    }
 
-
+})
 
 app.listen(3000, ()=>{
     console.log("connection open on 3000")

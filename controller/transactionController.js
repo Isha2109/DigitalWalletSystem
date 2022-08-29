@@ -1,13 +1,13 @@
 const { walletSchema }= require('../models/model')
 const { transactionSchema }= require('../models/model')
 const {getTransactionId}= require('../general/general')
+var {csvwriter, createObjectCsvWriter}  = require('csv-writer')
+const { uploadFileFunction,getPresignedUrl } = require('../config/s3')
+
 
 async function makeTransaction(transactObj){
-   // console.log(request)
-    //check if walletID exists, check the type of transactn by +ve or -ve amount, get balance of wallet, initially set opening and closing balance as wallet balance
-    //check balance > amount(for debit),  diff for credit and debit, update db with type, and balance
     try{
-        data = await walletSchema.findOne({id: transactObj.walletId},{_id:0, __v:0}) //walletId exists
+        data = await walletSchema.findOne({id: transactObj.walletId},{_id:0, __v:0})
         if(data){
             transactObj.transactionId = getTransactionId()
             transactObj.date = new Date()
@@ -63,8 +63,6 @@ async function makeTransaction(transactObj){
 
 }
 
-
-
 async function fetchTransactionsByWalletId(filterObj){
 
     try{
@@ -74,8 +72,10 @@ async function fetchTransactionsByWalletId(filterObj){
                 limit: filterObj.limit,
                 sort: filterObj.sort
             })
-            console.log(data.length)
-        if(data){
+        if(data.length == 0){
+            return {status:"ok", message:"no transactions available", data: data}
+        }
+        else if(data.length > 0){
             return {status:"ok", message:"transactions fetched", data: data}
         }
         else return {status:"not found", message:"walletId does not exist"}
@@ -85,19 +85,62 @@ async function fetchTransactionsByWalletId(filterObj){
     }
 }
 
-async function fetchTransactionsBySorting(filterObj){ //2 functions for sorting by date and amount?
-   
-    data = await transactionSchema.find({id:filterObj.id},
-    ['transactionId', 'id', 'openingBalance', 'ClosingBalance', 'date', 'amount', 'type', 'description'],
-    {
-        skip:{skip},
-        limit:{limit},
-        sort:{date: -1}
-    },
-    function(err,docs){
-        // Do something with the array of 10 objects
-    })
+async function getCSV(walletId){
+        try{
+            data = await transactionSchema.find({walletId: walletId},{_id:0, __v:0}) //transactions against walletId
+            if(data){
+                var filename = `${walletId}-transactionStatement.csv`
+                var path ="/tmp/" + filename
+                var createCsvWriter = createObjectCsvWriter
+                const csvWriter = createCsvWriter({
+                    path: path,
+                    header: [
+                      {id: 'transactionId', title: 'transactionId'},
+                      {id: 'amount', title: 'amount'},
+                      {id: 'description', title: 'description'},
+                      {id: 'type', title: 'type'},
+                      {id: 'date', title: 'date'},
+                      {id: 'walletId', title: 'walletId'},
+                      {id: 'openingBalance', title: 'openingBalance'},
+                      {id: 'closingBalance', title: 'closingBalance'}
+                    ]
+                  });
+                  let result = []
+                  for(let i =0; i<= data.length -1; i++){
+                        result.push({
+                            transactionId: data[i].transactionId,
+                            amount: data[i].amount,
+                            description: data[i].description,
+                            type : data[i].type,
+                            date : data[i].date,
+                            walletId : data[i].walletId,
+                            openingBalance : data[i].openingBalance,
+                            closingBalance : data[i].closingBalance
+                        })
+                    }
+                    try{
+                        await csvWriter.writeRecords(result)
+                    } catch(e){
+                        return {status:"error", message:"could not convert to csv file"}
+                    }              
+                    console.log('Data uploaded into csv successfully')
+                    ok = await uploadFileFunction(filename, path)
+                    if(ok.status === 'ok'){
+                        presinedUrl = getPresignedUrl(filename)
+                        return { status:"ok", data:presinedUrl }
+                    }
+                    else{
+                        return {status:"error", message:"upload failed"}
+                    }
+            } else{
+                return {status:"error", message:"no transactions available"}
+            }
+        }
+        catch(ex){
+            console.log(ex)
+            return {status:"error", response: "an unknown error occured"}
+        }
 }
 
 
-module.exports = { makeTransaction, fetchTransactionsByWalletId }
+module.exports = { makeTransaction, fetchTransactionsByWalletId, getCSV }
