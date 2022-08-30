@@ -1,5 +1,5 @@
 const url = 'http://localhost:3000/'
-const redirectUrl = 'http://127.0.0.1:5500/'
+const redirectUrl = 'http://127.0.0.1:80/'
 
 function getWalletByName() {
     let username = document.getElementById('username').value;
@@ -9,12 +9,12 @@ function getWalletByName() {
     .then(data => {
         if(data.status === "ok"){
             localStorage.setItem("walletId", data.walletId)
-            window.location.replace(redirectUrl+'Frontend/viewWallet.html')
+            window.location.replace(redirectUrl+'./viewWallet.html')
         }
         else {
             alert(data.message)
             if(data.message === "Wallet not Found"){
-                window.location.replace(redirectUrl+'Frontend/setup.html')
+                window.location.replace(redirectUrl+'./setup.html')
             }
         }
     })
@@ -35,7 +35,7 @@ function setupWallet() {
     .then(data => {
         if(data.status === "ok"){
             localStorage.setItem("walletId", data.walletId)
-            window.location.replace(redirectUrl+'Frontend/viewWallet.html')
+            window.location.replace(redirectUrl+'./viewWallet.html')
         } else {
             alert(data.message)
             document.getElementById('walletName').value = ''
@@ -49,7 +49,7 @@ function getTransactions() {
    walletId = localStorage.getItem('walletId')
    if(!walletId) {
     alert("Session Expired \n Please login again")
-    window.location.replace(redirectUrl+'Frontend/index.html')
+    window.location.replace(redirectUrl+'./index.html')
    }
    newUrl = url + 'transactions' +'?walletId='+walletId
    fetch(newUrl, { method: 'GET'})
@@ -66,7 +66,7 @@ function getTransactions() {
 function addDataToTable(arr){
     if(arr.length === 0) {
         alert("No transactions found \n Redirecting to Make Transaction Page")
-        window.location.replace(redirectUrl + 'Frontend/doTransactions.html')
+        window.location.replace(redirectUrl + './doTransactions.html')
     }
     let tableBody = document.getElementById('transcationResult')
     let count = 0
@@ -139,7 +139,7 @@ function sortamount(c) {
     walletId = localStorage.getItem("walletId");
     if (!walletId) {
       alert("Session Expired \n Please login again");
-      window.location.replace(redirectUrl + "Frontend/index.html");
+      window.location.replace(redirectUrl + "./index.html");
     }
     newUrl = url + "transactions" + "?walletId=" + walletId + "?sort=" + sort;
     fetch(newUrl, { method: "GET" })
