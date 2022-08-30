@@ -1,7 +1,7 @@
-// const url = 'http://52.66.195.190:3000/'
-// const redirectUrl = 'http://52.66.195.190:8080/'
-const url = 'http://localhost:3000/'
-const redirectUrl = 'http://127.0.0.1:5500/Frontend'
+const url = 'http://52.66.195.190:3000/'
+const redirectUrl = 'http://52.66.195.190:8080/'
+// const url = 'http://localhost:3000/'
+// const redirectUrl = 'http://127.0.0.1:5500/Frontend'
 
 function getWalletByName() {
     let username = document.getElementById('username').value;
