@@ -1,10 +1,12 @@
 const { walletSchema }= require('../models/model')
-const {convertNumbertoFourPrecision} = require('../transformer/transformer')
+const { convertNumbertoFourPrecision } = require('../transformer/transformer')
 
 async function setupWallet(setupObj){
     let request = new walletSchema(setupObj)
     try{
-        if(request.balance=== undefined || request.balance == null){request.balance = 0}
+        if(request.balance=== undefined || request.balance == null) request.balance = 0
+        data = await walletSchema.findOne({ username: setupObj.username}, { username: 1 }, {_id:0, _v:0})
+        if(data) return {status:"error", message: "wallet already exists"}
         await request.save();
         data = await walletSchema.find({id: setupObj.id},{_id:0, __v:0, transactionId:0})
         data = data.map(val => {

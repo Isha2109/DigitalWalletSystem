@@ -26,9 +26,10 @@ app.post('/setup', async function(req, res) {
         date : new Date()
     }
     ok = await setupWallet(setupObj)
-    if(ok.message ==="an unknown error occured")
+    if(ok.status ==="error")
     { 
-        res.status(404).send({status:"ok", message:"wallet setup failed"})
+        if(ok.message === "wallet already exists") res.status(400).send({status:"error", message:"wallet already exists for user"})
+        else res.status(400).send({status:"error", message:"Wallet Setup Failed"})
     }
     else res.status(200).send({status:"ok", message: "user wallet created successfully", data: ok.message})
 })
