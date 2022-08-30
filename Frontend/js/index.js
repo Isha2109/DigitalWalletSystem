@@ -1,5 +1,5 @@
-const url = 'http://localhost:3000/'
-const redirectUrl = 'http://127.0.0.1:80/'
+const url = 'http://52.66.195.190:3000/'
+const redirectUrl = 'http://52.66.195.190:8080/'
 
 function getWalletByName() {
     let username = document.getElementById('username').value;
