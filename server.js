@@ -96,7 +96,7 @@ app.get('/transactions', async function(req, res){
         limit : req.query.limit ? req.query.limit :0 
     }
     if(req.query.sort) {
-        filterObj.sort = req.query.sort === "date" ? { date : req.query.sortType === "asc" ? 0 : -1 } : { amount : req.query.sortType === "asc" ? 0 : -1 }
+        filterObj.sort = req.query.sort === "date" ? { date : req.query.sortType === "asc" ? 1 : -1 } : { amount : req.query.sortType === "asc" ? 1 : -1 }
     }
     ok = await fetchTransactionsByWalletId(filterObj)
 

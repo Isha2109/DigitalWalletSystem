@@ -17,24 +17,22 @@
             <h3>TRANSACTION HISTORY</h3>
         </div> 
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Sort By
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Date</a></li>
-                <li><a class="dropdown-item" href="#">Amount</a></li>
-              </ul>
+          <select id = "sortBy" class="form-select" aria-label="Default select example">
+            <option selected>Sort By</option>
+            <option value="amount">Amount</option>
+            <option value="date">Date</option>
+          </select>
         </div>
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Sort Order
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Descending</a></li>
-                <li><a class="dropdown-item" href="#">Ascending</a></li>
-              </ul>
+          <select id = "orderBy" class="form-select" aria-label="Default select example">
+            <option selected>Order By</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
         </div>
-     
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-primary" onclick="sortTransactions()">Sort</button>
+        </div>
       </div>
 
     <br/>
@@ -63,10 +61,18 @@
 
   <nav aria-label="Page navigation example">
     <ul class="pagination justify-content-center">
-      <li class="page-item"><a class="page-link" href="#">1-10</a></li>
-      <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      <li class="page-item"><button id = "previousBtn" class="btn btn-light" onclick="navigateToPreviousPage()" disabled>Previous</button></li>
+      <li class="page-item"><a id = "pageNo" class="page-link" href="#">1</a></li>
+      <li class="page-item"><button class="btn btn-light" onclick="navigateToNextPage()">Next</button></li>
     </ul>
   </nav>
+  <br/>
+  <br/>
+
+
+  <div>
+    <button type="button" class="btn btn-primary" style="margin-top:-12rem ;margin-right: -58rem;" onclick="downloadCSV()">Download Transactions Statement</button>
+  </div>
        
 
 </div>

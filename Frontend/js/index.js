@@ -1,7 +1,7 @@
-const url = 'http://52.66.195.190:3000/'
-const redirectUrl = 'http://52.66.195.190:8080/'
-// const url = 'http://localhost:3000/'
-// const redirectUrl = 'http://127.0.0.1:5500/Frontend'
+// const url = 'http://52.66.195.190:3000/'
+// const redirectUrl = 'http://52.66.195.190:8080/'
+const url = 'http://localhost:3000/'
+const redirectUrl = 'http://127.0.0.1:5500/Frontend'
 
 function getWalletByName() {
     let username = document.getElementById('username').value;
@@ -11,12 +11,12 @@ function getWalletByName() {
     .then(data => {
         if(data.status === "ok"){
             localStorage.setItem("walletId", data.walletId)
-            window.location.replace(redirectUrl+'./viewWallet.html')
+            window.location.replace(redirectUrl+'/viewWallet.html')
         }
         else {
             alert(data.message)
             if(data.message === "Wallet not Found"){
-                window.location.replace(redirectUrl+'./setup.html')
+                window.location.replace(redirectUrl+'/setup.html')
             }
         }
     })
@@ -37,7 +37,7 @@ function setupWallet() {
     .then(data => {
         if(data.status === "ok"){
             localStorage.setItem("walletId", data.walletId)
-            window.location.replace(redirectUrl+'./viewWallet.html')
+            window.location.replace(redirectUrl+'/viewWallet.html')
         } else {
             alert(data.message)
             document.getElementById('walletName').value = ''
@@ -48,12 +48,16 @@ function setupWallet() {
 }
 
 function getTransactions() {
-   walletId = localStorage.getItem('walletId')
-   if(!walletId) {
-    alert("Session Expired \n Please login again")
-    window.location.replace(redirectUrl+'./index.html')
-   }
-   newUrl = url + 'transactions' +'?walletId='+walletId
+  walletId = localStorage.getItem('walletId')
+  const pageNo = document.getElementById("pageNo").innerText
+  let skip
+  if(pageNo == 1){
+    skip = 0
+  } else skip = (Number(pageNo) - 1) * 10
+  console.log(pageNo)
+  console.log(skip)
+   newUrl = url + 'transactions' + '?walletId=' + walletId + '&skip='+ skip + '&limit=10'
+   console.log(newUrl)
    fetch(newUrl, { method: 'GET'})
    .then(response => response.json())
    .then(data => {
@@ -68,8 +72,9 @@ function getTransactions() {
 function addDataToTable(arr){
     if(arr.length === 0) {
         alert("No transactions found \n Redirecting to Make Transaction Page")
-        window.location.replace(redirectUrl + './doTransactions.html')
+        window.location.replace(redirectUrl + '/doTransactions.html')
     }
+    deleteTableData()
     let tableBody = document.getElementById('transcationResult')
     let count = 0
     for (i in arr) {
@@ -104,57 +109,6 @@ function addDataToTable(arr){
         node.appendChild(tdNode8)
     }
 }
-
-function sortamount(c) {
-    var l = c.length;
-    var f;
-    for (var i = 0; i < l; i++) {
-      f = c[i].amount.sort();
-    }
-    return f;
-  }
-  function sortBy() {
-    if (sort == true) {
-      sort = "date";
-    } else sort = "amount";
-    console.log(sort);
-    data = document.getElementById("sort-date").checked == true;
-    if (data) {
-      sort = "date";
-    } else {
-      sort = "amount";
-    }
-    console.log(sort);
-    if (document.getElementById("sort-date").checked) {
-      var sort = document.getElementById("sort-radio").checked;
-      var l = arr.sort(function (a, b) {
-        var c = new Date(a.date);
-        var d = new Date(b.date);
-        return c - d;
-      });
-      document.getElementById("sort-date").innerHTML = sort;
-    } else if (document.getElementById("sort-amount").checked) {
-      var sort = document.getElementById("sort-amount").value;
-      var k = sortamount(arr);
-      document.getElementById("sort-amount").innerHTML = sort;
-    }
-    walletId = localStorage.getItem("walletId");
-    if (!walletId) {
-      alert("Session Expired \n Please login again");
-      window.location.replace(redirectUrl + "./index.html");
-    }
-    newUrl = url + "transactions" + "?walletId=" + walletId + "?sort=" + sort;
-    fetch(newUrl, { method: "GET" })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "ok") {
-          addDataToTable(data.data);
-          arr = data.data;
-        } else {
-          alert(data.message);
-        }
-      });
-  }
 
 function getWalletById(){
   let walletId = localStorage.getItem("walletId");
@@ -194,19 +148,87 @@ function makeTransaction(){
     } else {
       alert(data.message)
     }
-    document.getElementById("balance").value = ''
+    document.getElementById("amount").value = ''
     document.getElementById("description").value = ''
   })
 }
 
 function redirectToDoTransacationPage(){
-  window.location.replace(redirectUrl+'./doTransation.html')
+  window.location.replace(redirectUrl+'/doTransaction.html')
 }
 
 function redirectToViewTransactionPage(){
-  window.location.replace(redirectUrl+'./viewTransactions.html')
+  window.location.replace(redirectUrl+'/viewTransactions.html')
 }
 
 function redirectToWalletPage(){
-  window.location.replace(redirectUrl+'./viewWallet.html')
+  window.location.replace(redirectUrl+'/viewWallet.html')
+}
+
+function sortTransactions(){
+  const pageNo = document.getElementById("pageNo").innerText
+  let skip
+  if(pageNo == 1){
+    skip = 0
+  } else skip = pageNo * 10
+  const walletId = localStorage.getItem("walletId")
+  const sort = document.getElementById("sortBy").value
+  const sortBy = document.getElementById("orderBy").value
+  newUrl = url + 'transactions' + '?walletId=' + walletId + '&sort=' + sort + '&sortType=' + sortBy + '&skip=' + skip + '&limit=10'
+  fetch(newUrl, { method: 'GET'})
+   .then(response => response.json())
+   .then(data => {
+     if(data.status === "ok"){
+        addDataToTable(data.data)
+     } else {
+        alert(data.message)
+     }
+   })
+}
+
+function deleteTableData(){
+  var e = document.getElementById("transcationResult");
+        
+  //e.firstElementChild can be used.
+  var child = e.lastElementChild; 
+  while (child) {
+      e.removeChild(child);
+      child = e.lastElementChild;
+  }
+}
+
+function navigateToNextPage(){
+  const pageNo = document.getElementById("pageNo").innerText
+  if(pageNo == 1){
+    const ele = document.getElementById("previousBtn")
+    ele.disabled = false
+  }
+  document.getElementById("pageNo").innerText = Number(pageNo) + 1
+  getTransactions()
+}
+
+function navigateToPreviousPage(){
+  const pageNo = document.getElementById("pageNo").innerText
+  if(pageNo == 2){
+    const ele = document.getElementById("previousBtn")
+    ele.disabled = true
+  }
+  document.getElementById("pageNo").innerText = Number(pageNo) - 1
+  getTransactions()
+}
+
+function downloadCSV(){
+  const walletId = localStorage.getItem("walletId")
+  const newUrl = url + 'transactions/exportToCSV?walletId=' + walletId
+  fetch(newUrl, { method: 'GET'})
+   .then(response => response.json())
+   .then(data => {
+     if(data.status === "ok"){
+        fetch(data.data, { method: 'GET' ,headers: { 'Access-Control-Allow-Origin':'http://127.0.0.1:5500','Access-Control-Allow-Credentials': 'true' }}).then(
+          console.log("Done")
+        )
+     } else {
+        alert(data.message)
+     }
+   })
 }

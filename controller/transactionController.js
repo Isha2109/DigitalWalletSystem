@@ -70,9 +70,9 @@ async function fetchTransactionsByWalletId(filterObj){
     try{
         data = await transactionSchema.find({walletId:filterObj.walletId},{_id:0, __v:0},
             {
+                sort: filterObj.sort,
                 skip:filterObj.skip,
-                limit: filterObj.limit,
-                sort: filterObj.sort
+                limit: filterObj.limit
             })
             data = data.map(val=> {
                 return {
