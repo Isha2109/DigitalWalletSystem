@@ -101,13 +101,10 @@ app.get('/transactions', async function(req, res){
     ok = await fetchTransactionsByWalletId(filterObj)
 
     if(ok.message==="an unknown error occured"){
-        res.status(400).send({status:"ok", message:"transaction failed, please try again"})
+        res.status(400).send({status:"error", message:"transaction failed, please try again"})
     }
     else if(ok.message==="walletId does not exist"){
-        res.status(400).send({status:"ok", message:"walletId does not exist"})
-    }
-    else if(ok.message==="no transactions available"){
-        res.status(200).send({status:"ok", message:"no transactions available"})
+        res.status(400).send({status:"error", message:"walletId does not exist"})
     }
     else res.status(200).send({status:"ok", message: "Transaction Details", data: ok.data})
 })

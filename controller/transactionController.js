@@ -86,10 +86,7 @@ async function fetchTransactionsByWalletId(filterObj){
                     closingBalance: convertNumbertoFourPrecision(val.closingBalance)
                 }
             })
-        if(data.length == 0){
-            return {status:"ok", message:"no transactions available", data: data}
-        }
-        else if(data.length > 0){
+        if(data.length >= 0){
             return {status:"ok", message:"transactions fetched", data: data}
         }
         else return {status:"not found", message:"walletId does not exist"}
