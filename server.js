@@ -121,5 +121,5 @@ app.get('/transactions/exportToCSV', async function(req, res){
 })
 
 app.listen(process.env.PORT || 3000, ()=>{
-    console.log(`connection open on 3000 ${process.env.PORT || 3000}`)
+    console.log(`connection open on ${process.env.PORT || 3000}`)
 })
