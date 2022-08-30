@@ -15,17 +15,17 @@ async function makeTransaction(transactObj){
             transactObj.date = new Date()
             transactObj.openingBalance = data.balance
             transactObj.amount = transactObj.amount
-            if(transactObj.openingBalance < transactObj.amount && transactObj.amount < 0){
-                return { status:"error", message:"insufficient balance" }
-            }
-            else if(transactObj.amount == 0){
+            
+            if(transactObj.amount == 0){
                 return { status:"error", message:"please enter an amount to proceed"}
             }
                 if(transactObj.amount < 0) transactObj.type = 'DEBIT'
                 else transactObj.type = 'CREDIT';
                 transactObj.closingBalance = transactObj.openingBalance + transactObj.amount
                 transactObj.amount = transactObj.type ==="CREDIT" ? transactObj.amount : transactObj.amount*-1
-                console.log(transactObj)
+                if(transactObj.openingBalance < transactObj.amount && transactObj.type ==="DEBIT"){
+                    return { status:"error", message:"insufficient balance" }
+                }
                 try{
                     let request = new transactionSchema(transactObj)
                     ok = await request.save()

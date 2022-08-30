@@ -49,7 +49,7 @@
             <label class="visually-hidden" for="amount">Amount</label>
             <div class="input-group">
               <div class="input-group-text">Amount</div>
-              <input type="text" class="form-control" id="amount" placeholder="Enter the Amount">
+              <input type="number" class="form-control" id="amount" placeholder="Enter the Amount">
             </div>
           </div>
 
@@ -63,17 +63,17 @@
         </div>
 
           
-        <div class="o-switch btn-group no-outline" data-toggle="buttons" role="group">
+        <div id = "transactionType" class="o-switch btn-group no-outline" data-toggle="buttons" role="group">
             <label class="btn btn-secondary active">
-              <input type="radio" name="type" id="debit" autocomplete="off" checked> DEBIT
+              <input type="radio" name="transactionType" value="debit" autocomplete="off" checked> DEBIT
             </label>
             <label class="btn btn-secondary">
-              <input type="radio" name="type" id="credit" autocomplete="off"> CREDIT
+              <input type="radio" name="transactionType" value="credit" autocomplete="off"> CREDIT
             </label>
           </div>
           <br/>
         <div style="margin:0px 5px 10px" class="col-9">
-          <button type="button" id="submitTransact" class="btn btn-primary btn-small" onclick="setupWallet()"">Make Payment</button>
+          <button type="button" id="submitTransact" class="btn btn-primary btn-small" onclick="makeTransaction()"">Make Payment</button>
         </div>
       </form></div>
 

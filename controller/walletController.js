@@ -34,6 +34,7 @@ async function getWalletById(id){
                 name: val.name,
                 id: val.id,
                 date: val.date,
+                username: val.username,
                 balance: convertNumbertoFourPrecision(val.balance)
             }
         })

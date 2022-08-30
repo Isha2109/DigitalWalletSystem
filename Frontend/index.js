@@ -71,7 +71,6 @@ function addDataToTable(arr){
     let tableBody = document.getElementById('transcationResult')
     let count = 0
     for (i in arr) {
-        console.log(arr[i])
         node = document.createElement('tr')
         tableBody.appendChild(node)
         tdNode8 = document.createElement('td')
@@ -154,4 +153,47 @@ function sortamount(c) {
         }
       });
   }
+
+function getWalletById(){
+  let walletId = localStorage.getItem("walletId");
+  let newUrl = url + `wallet/${walletId}`
+  fetch(newUrl, { method: "GET" })
+  .then(response => response.json())
+  .then(data => {
+    walletObj = data.data[0]
+    const div1 = document.getElementById("walletName")
+    div1.innerHTML = walletObj.name
+    const div2 = document.getElementById("balance")
+    div2.innerHTML = walletObj.balance
+    const div3 = document.getElementById("walletId")
+    div3.innerHTML = walletObj.id
+    const div4 = document.getElementById("createdAt")
+    div4.innerHTML = moment(walletObj.date).format("DD MMM YYYY")
+    const p = document.getElementById("username")
+    p.innerHTML = walletObj.username
+  })
+}
+
+function makeTransaction(){
+  const walletId = localStorage.getItem("walletId")
+  const amount = document.getElementById("amount").value
+  const description = document.getElementById("description").value
+  const transactionType = document.querySelector('input[name="transactionType"]:checked').value;
+  const newUrl = url + `transact/${walletId}`
+  const body = {
+    amount : transactionType === 'debit' ? amount*-1 : amount,
+    description : description
+  }
+  fetch(newUrl , { method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'} })
+  .then(response => response.json())
+  .then(data => {
+    if(data.status === "ok"){
+      alert("Transaction Successful")
+    } else {
+      alert(data.message)
+    }
+    document.getElementById("balance").value = ''
+    document.getElementById("description").value = ''
+  })
+}
   
