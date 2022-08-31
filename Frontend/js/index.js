@@ -74,7 +74,7 @@ function getTransactions() {
 function addDataToTable(arr){
     if(arr.length === 0) {
         alert("No transactions found \n Redirecting to Make Transaction Page")
-        window.location.replace(redirectUrl + '/doTransactions.html')
+        window.location.replace(redirectUrl + '/doTransaction.html')
     }
     deleteTableData()
     let tableBody = document.getElementById('transcationResult')
