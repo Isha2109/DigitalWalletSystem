@@ -1,7 +1,7 @@
-const url = 'http://52.66.195.190:3000/'
-const redirectUrl = 'http://52.66.195.190:8080/'
-// const url = 'http://localhost:3000/'
-// const redirectUrl = 'http://127.0.0.1:5500/Frontend'
+// const url = 'http://52.66.195.190:3000/'
+// const redirectUrl = 'http://52.66.195.190:8080/'
+const url = 'http://localhost:3000/'
+const redirectUrl = 'http://127.0.0.1:5500/Frontend'
 
 function getWalletByName() {
     let username = document.getElementById('username').value;
@@ -32,11 +32,13 @@ function setupWallet() {
         balance: balance,
         username: username
     }
+    console.log(body)
     fetch(newUrl, { method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'} })
     .then(response => response.json())
     .then(data => {
         if(data.status === "ok"){
-            localStorage.setItem("walletId", data.walletId)
+          console.log(data.data[0])
+            localStorage.setItem("walletId", data.data[0].id)
             window.location.replace(redirectUrl+'/viewWallet.html')
         } else {
             alert(data.message)
